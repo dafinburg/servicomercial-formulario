@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administración - Maestro de Productos | Servicomercial</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .drop-zone { border: 2px dashed #d1d5db; transition: all 0.2s; }
+        .drop-zone.drag-over { border-color: #22c55e; background: #f0fdf4; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+    <header class="bg-gray-900 text-white">
+        <div class="max-w-4xl mx-auto px-6 py-5 flex items-center justify-between">
+            <div>
+                <h1 class="text-xl font-bold">Panel de Administración</h1>
+                <p class="text-sm text-gray-400">Maestro de Productos &bull; La Quesera &bull; Servicomercial</p>
+            </div>
+            <span class="bg-amber-500 text-black text-xs font-bold px-3 py-1 rounded-full">ADMIN</span>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-6 py-8 space-y-8">
+
+        <!-- Instrucciones -->
+        <div class="bg-amber-50 border border-amber-200 rounded-xl p-5">
+            <h2 class="font-bold text-amber-800 mb-2"><i class="fa-solid fa-info-circle mr-1"></i> ¿Cómo funciona?</h2>
+            <ol class="text-sm text-amber-700 space-y-1 list-decimal pl-5">
+                <li>Suba el archivo Excel maestro con los productos y precios actualizados.</li>
+                <li>Verifique la vista previa de los datos.</li>
+                <li>Haga clic en <strong>"Actualizar Formulario"</strong> — esto descargará el archivo <code>data.js</code>.</li>
+                <li>Reemplace el archivo <code>data.js</code> existente en la carpeta <code>Sistema de Pedidos</code> con el descargado.</li>
+                <li>¡Listo! Los vendedores verán los precios actualizados al abrir el formulario.</li>
+            </ol>
+        </div>
+
+        <!-- Paso 1: Subir Excel -->
+        <section class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100 bg-gray-50">
+                <h2 class="font-bold text-gray-900"><span class="text-green-600 mr-2">1.</span> Cargar archivo maestro (Excel o CSV)</h2>
+            </div>
+            <div class="p-6">
+                <div class="drop-zone rounded-xl p-10 text-center cursor-pointer" id="drop-zone" onclick="document.getElementById('file-input').click()">
+                    <i class="fa-solid fa-cloud-arrow-up text-4xl text-gray-300 mb-4"></i>
+                    <p class="text-gray-600 font-medium">Arrastre su archivo aquí o haga clic para seleccionar</p>
+                    <p class="text-xs text-gray-400 mt-1">Soporta .xlsx, .xls y .csv</p>
+                    <input type="file" id="file-input" accept=".xlsx,.xls,.csv" class="hidden">
+                </div>
+                <div id="file-info" class="mt-4 hidden">
+                    <div class="flex items-center gap-3 p-3 bg-green-50 rounded-lg border border-green-200">
+                        <i class="fa-solid fa-file-excel text-green-600 text-xl"></i>
+                        <div>
+                            <p class="text-sm font-semibold text-gray-900" id="file-name"></p>
+                            <p class="text-xs text-gray-500" id="file-meta"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fecha de Lista -->
+                <div class="mt-4">
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Fecha / Vigencia de la Lista de Precios</label>
+                    <input type="text" id="fecha-lista-input" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-green-400 outline-none" placeholder='Ej: AMBA - Marzo 2026' value="AMBA - Febrero 2026">
+                    <p class="text-xs text-gray-400 mt-1">Esto aparecerá en el encabezado del formulario de pedidos.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Paso 2: Vista Previa -->
+        <section class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden" id="preview-section" style="display:none">
+            <div class="px-6 py-4 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
+                <h2 class="font-bold text-gray-900"><span class="text-green-600 mr-2">2.</span> Vista previa (<span id="product-count">0</span> productos)</h2>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-xs">
+                    <thead class="bg-gray-50 text-gray-500 uppercase tracking-wider">
+                        <tr>
+                            <th class="px-3 py-2 text-left">Art</th>
+                            <th class="px-3 py-2 text-left">Categoría</th>
+                            <th class="px-3 py-2 text-left">Producto</th>
+                            <th class="px-3 py-2 text-left">Marca</th>
+                            <th class="px-3 py-2 text-right">Precio Lista</th>
+                            <th class="px-3 py-2 text-center">Bonif%</th>
+                            <th class="px-3 py-2 text-right">Bonificado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="preview-tbody"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Paso 3: Generar -->
+        <section class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden" id="generate-section" style="display:none">
+            <div class="px-6 py-4 border-b border-gray-100 bg-gray-50">
+                <h2 class="font-bold text-gray-900"><span class="text-green-600 mr-2">3.</span> Actualizar formulario de vendedores</h2>
+            </div>
+            <div class="p-6 text-center">
+                <button id="btn-generate" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg hover:shadow-xl transition-all text-lg">
+                    <i class="fa-solid fa-download mr-2"></i> Descargar data.js actualizado
+                </button>
+                <p class="text-sm text-gray-500 mt-4">Guarde el archivo descargado en la carpeta <code class="bg-gray-100 px-1.5 py-0.5 rounded">Sistema de Pedidos</code>, reemplazando el existente.</p>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        let parsedProducts = [];
+
+        // Drag & Drop
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+
+        ['dragenter','dragover'].forEach(e => {
+            dropZone.addEventListener(e, (ev) => { ev.preventDefault(); dropZone.classList.add('drag-over'); });
+        });
+        ['dragleave','drop'].forEach(e => {
+            dropZone.addEventListener(e, (ev) => { ev.preventDefault(); dropZone.classList.remove('drag-over'); });
+        });
+        dropZone.addEventListener('drop', (ev) => {
+            const files = ev.dataTransfer.files;
+            if (files.length > 0) processFile(files[0]);
+        });
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) processFile(e.target.files[0]);
+        });
+
+        function processFile(file) {
+            document.getElementById('file-name').textContent = file.name;
+            document.getElementById('file-meta').textContent = `${(file.size / 1024).toFixed(1)} KB`;
+            document.getElementById('file-info').classList.remove('hidden');
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                try {
+                    const data = new Uint8Array(evt.target.result);
+                    const wb = XLSX.read(data, { type: 'array' });
+                    const ws = wb.Sheets[wb.SheetNames[0]];
+                    const json = XLSX.utils.sheet_to_json(ws, { defval: '' });
+
+                    parsedProducts = json.filter(r => {
+                        const art = r.Art || r.Articulo || r.art || '';
+                        return art !== '';
+                    }).map(r => ({
+                        Art: String(r.Art || r.Articulo || r.art || ''),
+                        Categoria: r.Categoria || r.categoria || '',
+                        Producto: r.Producto || r.producto || '',
+                        Marca: r.Marca || r.marca || '',
+                        Presentacion: r.Presentacion || r['Presentación'] || r.presentacion || '',
+                        UnidxBulto: parseFloat(String(r.UnidxBulto || r.UnidXBulto || r.unidxbulto || '1').replace(/,/g,'.')) || 1,
+                        PrecioLista: parseFloat(String(r.PrecioLista || r.preciolista || '0').replace(/,/g,'.')) || 0,
+                        Bonif: parseFloat(String(r.Bonif || r.bonif || r.Bonificacion || '0').replace(/,/g,'.')) || 0,
+                        PrecioBonificado: parseFloat(String(r.PrecioBonificado || r.preciobonificado || '0').replace(/,/g,'.')) || 0,
+                        PesoKg: parseFloat(String(r.PesoKg || r.pesokg || r.Peso || '1').replace(/,/g,'.')) || 1
+                    }));
+
+                    // Check for FechaLista
+                    const rowWithDate = json.find(r => r.FechaLista);
+                    if (rowWithDate) {
+                        document.getElementById('fecha-lista-input').value = rowWithDate.FechaLista;
+                    }
+
+                    showPreview();
+                } catch(err) {
+                    alert('Error al leer el archivo: ' + err.message);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function showPreview() {
+            document.getElementById('preview-section').style.display = '';
+            document.getElementById('generate-section').style.display = '';
+            document.getElementById('product-count').textContent = parsedProducts.length;
+
+            const tbody = document.getElementById('preview-tbody');
+            tbody.innerHTML = '';
+            parsedProducts.forEach(p => {
+                const tr = document.createElement('tr');
+                tr.className = 'border-b border-gray-50 hover:bg-gray-50';
+                tr.innerHTML = `
+                    <td class="px-3 py-2 font-bold text-gray-600">${p.Art}</td>
+                    <td class="px-3 py-2 text-gray-500">${p.Categoria}</td>
+                    <td class="px-3 py-2 font-medium text-gray-900">${p.Producto}</td>
+                    <td class="px-3 py-2 text-gray-500">${p.Marca}</td>
+                    <td class="px-3 py-2 text-right text-gray-400">$${p.PrecioLista.toLocaleString('es-AR')}</td>
+                    <td class="px-3 py-2 text-center"><span class="bg-green-50 text-green-700 px-1.5 py-0.5 rounded text-[10px] font-bold">${p.Bonif}%</span></td>
+                    <td class="px-3 py-2 text-right font-bold">$${p.PrecioBonificado.toLocaleString('es-AR',{minimumFractionDigits:2})}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Generar data.js
+        document.getElementById('btn-generate').addEventListener('click', () => {
+            const fecha = document.getElementById('fecha-lista-input').value;
+            const now = new Date().toISOString().slice(0,10);
+
+            let content = `// ============================================================\n`;
+            content += `// ESTE ARCHIVO ES GENERADO AUTOMATICAMENTE POR admin.html\n`;
+            content += `// NO EDITAR MANUALMENTE - Use la página de administración\n`;
+            content += `// Última actualización: ${now}\n`;
+            content += `// ============================================================\n\n`;
+            content += `var MASTER_FECHA_LISTA = ${JSON.stringify(fecha)};\n\n`;
+            content += `var MASTER_PRODUCTOS = [\n`;
+
+            parsedProducts.forEach((p, i) => {
+                const comma = i < parsedProducts.length - 1 ? ',' : '';
+                content += `    {Art:${JSON.stringify(p.Art)},Categoria:${JSON.stringify(p.Categoria)},Producto:${JSON.stringify(p.Producto)},Marca:${JSON.stringify(p.Marca)},Presentacion:${JSON.stringify(p.Presentacion)},UnidxBulto:${p.UnidxBulto},PrecioLista:${p.PrecioLista},Bonif:${p.Bonif},PrecioBonificado:${p.PrecioBonificado},PesoKg:${p.PesoKg}}${comma}\n`;
+            });
+
+            content += `];\n`;
+
+            const blob = new Blob([content], { type: 'application/javascript' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'data.js';
+            a.click();
+            URL.revokeObjectURL(url);
+
+            // Mostrar mensaje de éxito
+            const btn = document.getElementById('btn-generate');
+            const orig = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-circle-check mr-2"></i> ¡Descargado! Reemplácelo en la carpeta';
+            btn.classList.replace('bg-green-600', 'bg-gray-600');
+            setTimeout(() => { btn.innerHTML = orig; btn.classList.replace('bg-gray-600','bg-green-600'); }, 4000);
+        });
+    </script>
+</body>
+</html>

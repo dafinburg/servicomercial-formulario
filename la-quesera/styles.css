@@ -1,0 +1,118 @@
+/* La Quesera - Styles */
+body { font-family: 'Inter', sans-serif; }
+.font-display { font-family: 'Playfair Display', serif; }
+
+/* Brand Header */
+.brand-header {
+    background: linear-gradient(135deg, #14532d 0%, #166534 50%, #15803d 100%);
+}
+
+/* Product Banner */
+.product-banner {
+    border-bottom: 3px solid #166534;
+}
+.product-banner img {
+    filter: brightness(0.85) saturate(1.1);
+    transition: filter 0.3s;
+}
+.product-banner img:hover {
+    filter: brightness(1) saturate(1.2);
+}
+
+/* Glass Footer */
+.glass-footer {
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+}
+
+/* Input Fields */
+.input-field {
+    width: 100%;
+    padding: 0.6rem 1rem;
+    border: 1px solid #e7e5e4;
+    border-radius: 0.75rem;
+    font-size: 0.875rem;
+    outline: none;
+    transition: all 0.2s;
+    background: #fafaf9;
+}
+.input-field:focus {
+    border-color: #22c55e;
+    box-shadow: 0 0 0 3px rgba(34,197,94,0.15);
+    background: #fff;
+}
+
+/* Category Badge */
+.category-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.35rem 0.75rem;
+    border-radius: 0.5rem;
+    border-width: 1px;
+}
+
+/* Product Row */
+.product-row {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    transition: all 0.2s;
+    gap: 1rem;
+}
+.product-row:hover { background: #f0fdf4; }
+
+/* Qty Controls */
+.qty-group {
+    display: flex;
+    align-items: center;
+    border: 1px solid #e7e5e4;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    background: #fff;
+}
+.qty-btn {
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    color: #6b7280;
+    transition: all 0.15s;
+    font-size: 0.75rem;
+}
+.qty-btn:hover { background: #f0fdf4; color: #15803d; }
+.qty-input {
+    width: 2.5rem;
+    text-align: center;
+    font-weight: 700;
+    font-size: 0.875rem;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: #111827;
+}
+
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+input[type=number] { -moz-appearance: textfield; appearance: textfield; }
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #d6d3d1; border-radius: 3px; }
+
+.item-flash { animation: flash 0.4s ease-out; }
+@keyframes flash { 0% { background-color: #dcfce7; } 100% { background-color: transparent; } }
+
+@media (max-width: 640px) {
+    .product-row { flex-wrap: wrap; }
+    .product-info { flex: 1 1 100%; margin-bottom: 0.25rem; }
+}
