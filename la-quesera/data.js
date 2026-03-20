@@ -1,6 +1,6 @@
 // ============================================================
 // GENERADO AUTOMATICAMENTE DESDE GOOGLE SHEETS PARA GITHUB
-// Última actualización: 20/3/2026, 01:53:55
+// Última actualización: 20/3/2026, 01:55:18
 // ============================================================
 var MASTER_FECHA_LISTA = "AMBA - Marzo 2026";
 var MASTER_PRODUCTOS = [
@@ -554,6 +554,18 @@ var MASTER_PRODUCTOS = [
         "PrecioLista": 11910.94,
         "Bonif": 30,
         "PrecioBonificado": 8337.66,
+        "PesoKg": 1
+    },
+    {
+        "Art": "488",
+        "Categoria": "MANTECAS NUEVA",
+        "Producto": "Manteca",
+        "Marca": "La Quesera",
+        "Presentacion": "Caja con 8 Pilones de 2.5 kg.",
+        "UnidxBulto": 8,
+        "PrecioLista": 11910.94,
+        "Bonif": 30,
+        "PrecioBonificado": 9337.66,
         "PesoKg": 1
     }
 ];
