@@ -1,6 +1,6 @@
 // ============================================================
 // GENERADO AUTOMATICAMENTE DESDE GOOGLE SHEETS PARA GITHUB
-// Última actualización: 20/3/2026, 01:35:43
+// Última actualización: 20/3/2026, 01:49:51
 // ============================================================
 var MASTER_FECHA_LISTA = "AMBA - Febrero 2026";
 var MASTER_PRODUCTOS = [
