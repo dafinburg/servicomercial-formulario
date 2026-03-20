@@ -1,8 +1,8 @@
 // ============================================================
 // GENERADO AUTOMATICAMENTE DESDE GOOGLE SHEETS PARA GITHUB
-// Última actualización: 20/3/2026, 01:49:51
+// Última actualización: 20/3/2026, 01:53:55
 // ============================================================
-var MASTER_FECHA_LISTA = "AMBA - Febrero 2026";
+var MASTER_FECHA_LISTA = "AMBA - Marzo 2026";
 var MASTER_PRODUCTOS = [
     {
         "Art": "2",
@@ -26,6 +26,18 @@ var MASTER_PRODUCTOS = [
         "PrecioLista": 13698.51,
         "Bonif": 30,
         "PrecioBonificado": 9588.96,
+        "PesoKg": 1
+    },
+    {
+        "Art": "62",
+        "Categoria": "QUESOS BLANDOS AZULES",
+        "Producto": "Queso Azul",
+        "Marca": "Shehuen",
+        "Presentacion": "Caja por 4 Hormas de 2.4 kg c/u aprox.",
+        "UnidxBulto": 4,
+        "PrecioLista": 11955.41,
+        "Bonif": 30,
+        "PrecioBonificado": 8368.79,
         "PesoKg": 1
     },
     {
