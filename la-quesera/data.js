@@ -1,8 +1,8 @@
 // ============================================================
-// ESTE ARCHIVO ES GENERADO AUTOMATICAMENTE DESDE GOOGLE SHEETS
-// Última actualización: 20/3/2026, 12:20:49
+// GENERADO AUTOMATICAMENTE DESDE GOOGLE SHEETS PARA GITHUB
+// Última actualización: 20/3/2026, 01:35:43
 // ============================================================
-var MASTER_FECHA_LISTA = "AMBA - Marzo 2026";
+var MASTER_FECHA_LISTA = "AMBA - Febrero 2026";
 var MASTER_PRODUCTOS = [
     {
         "Art": "2",
@@ -13,7 +13,7 @@ var MASTER_PRODUCTOS = [
         "UnidxBulto": 4,
         "PrecioLista": 14283.79,
         "Bonif": 30,
-        "PrecioBonificado": 18298.65,
+        "PrecioBonificado": 8298.65,
         "PesoKg": 1
     },
     {
