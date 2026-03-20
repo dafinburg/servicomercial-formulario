@@ -1,9 +1,9 @@
 // ===== CONFIGURACIÓN =====
 const N8N_WEBHOOK_URL = 'https://n8n.mtrpymes.com.ar/webhook/c6bf2c68-75bf-418d-b86f-3992fe58f5f6';
 
-// ===== ESTADO (lee de data.js cargado via <script>) =====
-let products = (typeof MASTER_PRODUCTOS !== 'undefined') ? MASTER_PRODUCTOS : [];
-let fechaLista = (typeof MASTER_FECHA_LISTA !== 'undefined') ? MASTER_FECHA_LISTA : '';
+// ===== ESTADO =====
+let products = [];
+let fechaLista = '';
 let cart = {};
 
 // ===== DOM =====
@@ -39,8 +39,19 @@ const categoryColors = {
 
 // ===== INIT =====
 document.addEventListener('DOMContentLoaded', () => {
-    fechaListaEl.textContent = fechaLista;
-    renderProducts();
+    // Carga de datos dinámica para evitar caché
+    const script = document.createElement('script');
+    script.src = 'data.js?v=' + new Date().getTime();
+    script.onload = () => {
+        if (typeof MASTER_PRODUCTOS !== 'undefined') products = MASTER_PRODUCTOS;
+        if (typeof MASTER_FECHA_LISTA !== 'undefined') fechaLista = MASTER_FECHA_LISTA;
+        fechaListaEl.textContent = fechaLista;
+        renderProducts();
+    };
+    script.onerror = () => {
+        productsContainer.innerHTML = '<div class="text-center py-12 text-red-500"><i class="fa-solid fa-triangle-exclamation text-3xl mb-3"></i><p>Error al cargar la lista de precios.</p></div>';
+    };
+    document.head.appendChild(script);
 });
 searchInput.addEventListener('input', (e) => renderProducts(e.target.value));
 
