@@ -1,5 +1,5 @@
 // GENERADO AUTOMATICAMENTE DESDE GOOGLE SHEETS PARA GITHUB
-// Última actualización: 02/4/2026, 15:03:59
+// Última actualización: 02/4/2026, 15:16:45
 // Canal: DISTRIBUIDORES
 const MASTER_PRODUCTOS = [
     {
@@ -10,9 +10,9 @@ const MASTER_PRODUCTOS = [
         "Marca": "Saint Gottard",
         "Presentacion": "Pack de 6 estuches | EAN: 7798008291218",
         "UnidxBulto": 6,
-        "PrecioLista": 3450.84,
+        "PrecioLista": 2450.84,
         "Bonif": 0,
-        "PrecioBonificado": 3450.84,
+        "PrecioBonificado": 2450.84,
         "PesoKg": 1
     },
     {
@@ -744,4 +744,4 @@ const MASTER_PRODUCTOS = [
         "PesoKg": 1
     }
 ];
-const MASTER_FECHA_LISTA = "Lista Distribuidores - Vigente al 30/03/2026";
+const MASTER_FECHA_LISTA = "Lista Distribuidores - Vigente al 01/04/2026";
