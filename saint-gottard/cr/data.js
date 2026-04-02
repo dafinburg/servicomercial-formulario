@@ -1,5 +1,5 @@
 // GENERADO AUTOMATICAMENTE DESDE GOOGLE SHEETS PARA GITHUB
-// Última actualización: 02/4/2026, 15:04:05
+// Última actualización: 02/4/2026, 15:16:49
 // Canal: CANAL RETAIL (CR)
 const MASTER_PRODUCTOS = [
     {
@@ -10,9 +10,9 @@ const MASTER_PRODUCTOS = [
         "Marca": "Saint Gottard",
         "Presentacion": "Pack de 6 estuches | EAN: 7798008291218",
         "UnidxBulto": 6,
-        "PrecioLista": 3573.38,
+        "PrecioLista": 2573.38,
         "Bonif": 0,
-        "PrecioBonificado": 3573.38,
+        "PrecioBonificado": 2573.38,
         "PesoKg": 1
     },
     {
@@ -744,4 +744,4 @@ const MASTER_PRODUCTOS = [
         "PesoKg": 1
     }
 ];
-const MASTER_FECHA_LISTA = "Lista Canal Retail (CR) - Vigente al 30/03/2026";
+const MASTER_FECHA_LISTA = "Lista Canal Retail (CR) - Vigente al 01/04/2026";
