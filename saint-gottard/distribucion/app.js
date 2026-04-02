@@ -9,13 +9,13 @@ let cart = {};
 
 // ===== DOM =====
 const productsContainer = document.getElementById('products-container');
-const totalAmountEl = document.getElementById('total-amount');
-const totalItemsEl = document.getElementById('total-items');
-const searchInput = document.getElementById('search-products');
-const orderForm = document.getElementById('order-form');
-const notification = document.getElementById('notification');
+const totalAmountEl     = document.getElementById('total-amount');
+const totalItemsEl      = document.getElementById('total-items');
+const searchInput       = document.getElementById('search-products');
+const orderForm         = document.getElementById('order-form');
+const notification      = document.getElementById('notification');
 const btnCloseNotification = document.getElementById('btn-close-notification');
-const fechaListaEl = document.getElementById('fecha-lista');
+const fechaListaEl      = document.getElementById('fecha-lista');
 
 const categoryIcons = {
     'VARIEDADES DE TE VERDE Y ROJO':                'fa-mug-hot',
@@ -44,6 +44,12 @@ const categoryColors = {
 
 // ===== INIT =====
 document.addEventListener('DOMContentLoaded', () => {
+    // Auto-fill fecha
+    const hoy = new Date();
+    document.getElementById('pedido-fecha').value =
+        hoy.toLocaleDateString('es-AR', { day:'2-digit', month:'2-digit', year:'numeric' });
+
+    // Carga dinámica del maestro
     const script = document.createElement('script');
     script.src = 'data.js?v=' + new Date().getTime();
     script.onload = () => {
@@ -78,7 +84,7 @@ function renderProducts(filterText = '') {
     for (const [category, items] of Object.entries(groups)) {
         const section = document.createElement('section');
         section.className = 'bg-white rounded-2xl shadow-sm border border-stone-200/60 overflow-hidden mb-6';
-        const icon = categoryIcons[category] || 'fa-tag';
+        const icon       = categoryIcons[category] || 'fa-tag';
         const colorClass = categoryColors[category] || 'bg-gray-50 text-gray-700 border-gray-200';
 
         let html = `
@@ -87,27 +93,37 @@ function renderProducts(filterText = '') {
                 <span class="text-xs text-gray-400 font-medium">${items.length} producto${items.length>1?'s':''}</span>
             </div>
             <div class="hidden sm:flex items-center px-5 py-2 bg-stone-50/50 text-[11px] font-semibold text-gray-400 uppercase tracking-wider border-b border-stone-100">
-                <div class="w-20">Cód.</div><div class="flex-1">Producto</div><div class="w-20 text-right hidden md:block">EAN</div><div class="w-16 text-center">Est./Pack</div><div class="w-28 text-right">Precio Lista</div><div class="w-28 text-center ml-3">Packs</div>
+                <div class="w-10"></div>
+                <div class="w-20">Cód.</div>
+                <div class="flex-1">Producto</div>
+                <div class="w-16 text-center">Est./Pack</div>
+                <div class="w-28 text-right">Precio Lista</div>
+                <div class="w-28 text-center ml-3">Packs</div>
             </div>`;
 
         let rows = '';
         items.forEach(p => {
-            const art = String(p.Art);
+            const art   = String(p.Art);
             const precio = Number(p.PrecioLista) || 0;
-            const unid = Number(p.UnidxBulto) || 1;
-            const qty = cart[art] ? cart[art].qty : 0;
+            const unid  = Number(p.UnidxBulto) || 1;
+            const qty   = cart[art] ? cart[art].qty : 0;
+            const img   = p.Imagen || '';
 
             rows += `
                 <div class="product-row border-b border-stone-50 last:border-0" data-art="${art}">
-                    <div class="w-20 text-xs font-bold text-gray-500">${art}</div>
+                    <div class="w-10 flex-shrink-0">
+                        ${img ? `<img src="${img}" class="w-9 h-9 object-contain rounded" loading="lazy" onerror="this.style.display='none'">` : ''}
+                    </div>
+                    <div class="w-20 text-xs font-bold text-gray-500 flex-shrink-0">${art}</div>
                     <div class="flex-1 product-info min-w-0">
                         <div class="font-semibold text-sm text-gray-900 truncate">${p.Producto}</div>
                         <div class="text-xs text-gray-400 truncate">${p.Presentacion}</div>
                     </div>
-                    <div class="w-20 text-right text-xs text-gray-300 hidden md:block">${p.EAN13}</div>
-                    <div class="w-16 text-center"><span class="text-[10px] font-bold text-brand-600 bg-brand-50 px-1.5 py-0.5 rounded">${unid} u.</span></div>
-                    <div class="w-28 text-right font-bold text-sm text-gray-900">$${precio.toLocaleString('es-AR',{minimumFractionDigits:2})}</div>
-                    <div class="w-28 ml-3">
+                    <div class="w-16 text-center flex-shrink-0">
+                        <span class="text-[10px] font-bold text-brand-600 bg-brand-50 px-1.5 py-0.5 rounded">${unid} u.</span>
+                    </div>
+                    <div class="w-28 text-right font-bold text-sm text-gray-900 flex-shrink-0">$${precio.toLocaleString('es-AR',{minimumFractionDigits:2})}</div>
+                    <div class="w-28 ml-3 flex-shrink-0">
                         <div class="qty-group">
                             <button type="button" class="qty-btn btn-minus" data-art="${art}"><i class="fa-solid fa-minus"></i></button>
                             <input type="number" class="qty-input" value="${qty}" min="0" data-art="${art}">
@@ -122,7 +138,7 @@ function renderProducts(filterText = '') {
     }
 
     document.querySelectorAll('.btn-minus').forEach(b => b.addEventListener('click', () => updateCart(b.dataset.art, -1)));
-    document.querySelectorAll('.btn-plus').forEach(b => b.addEventListener('click', () => updateCart(b.dataset.art, 1)));
+    document.querySelectorAll('.btn-plus').forEach(b  => b.addEventListener('click', () => updateCart(b.dataset.art,  1)));
     document.querySelectorAll('.qty-input').forEach(i => i.addEventListener('change', () => setCart(i.dataset.art, parseInt(i.value)||0)));
 }
 
@@ -160,32 +176,41 @@ function calculateTotal() {
         items += cart[art].qty;
     }
     totalAmountEl.innerText = '$ ' + total.toLocaleString('es-AR', {minimumFractionDigits:2});
-    totalItemsEl.innerText = items;
+    totalItemsEl.innerText  = items;
 }
 
 // ===== SUBMIT =====
 orderForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     if (Object.keys(cart).length === 0) { alert('Agregue al menos un producto.'); return; }
-    const btn = document.getElementById('btn-submit');
+    const btn  = document.getElementById('btn-submit');
     const orig = btn.innerHTML;
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Enviando...';
-    btn.disabled = true;
+    btn.disabled  = true;
 
     const payload = {
         empresa: 'Saint Gottard', canal: CANAL, vendedor: 'SERVICOMERCIAL',
-        fecha_lista: fechaLista, fecha_pedido: new Date().toISOString(),
+        fecha: document.getElementById('pedido-fecha').value,
+        vendedor_nombre: document.getElementById('pedido-vendedor').value,
+        fecha_lista: fechaLista,
+        fecha_pedido: new Date().toISOString(),
         cliente: {
-            razon_social: document.getElementById('cliente-nombre').value,
-            cuit: document.getElementById('cliente-cuit').value,
-            email: document.getElementById('cliente-email').value,
-            telefono: document.getElementById('cliente-telefono').value,
-            direccion: document.getElementById('cliente-direccion').value,
-            facturacion: document.getElementById('cliente-facturacion').value,
-            horario_entrega: document.getElementById('cliente-horario').value
+            razon_social:    document.getElementById('cliente-nombre').value,
+            telefono:        document.getElementById('cliente-telefono').value,
+            cuit:            document.getElementById('cliente-cuit').value,
+            email:           document.getElementById('cliente-email').value,
+            condicion_pago:  document.getElementById('cliente-condicion-pago').value,
+            horario_entrega: document.getElementById('cliente-horario').value,
+            direccion:       document.getElementById('cliente-direccion').value,
+            facturacion:     document.getElementById('cliente-facturacion').value
+        },
+        transporte: {
+            nombre:            document.getElementById('transporte-nombre').value,
+            telefono:          document.getElementById('transporte-telefono').value,
+            direccion_redespacho: document.getElementById('transporte-direccion').value
         },
         items: Object.values(cart).map(c => {
-            const u = Number(c.item.UnidxBulto)||1;
+            const u = Number(c.item.UnidxBulto) || 1;
             return {
                 cod: c.item.Art, ean13: c.item.EAN13,
                 producto: c.item.Producto, categoria: c.item.Categoria,
@@ -195,15 +220,16 @@ orderForm.addEventListener('submit', async (e) => {
             };
         }),
         total_estimado_sin_iva: Object.values(cart).reduce((s,c) => {
-            const u = Number(c.item.UnidxBulto)||1;
-            return s + c.qty * c.price * u;
+            return s + c.qty * c.price * (Number(c.item.UnidxBulto)||1);
         }, 0)
     };
 
     try {
         await fetch(N8N_WEBHOOK_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
         showNotification();
-        orderForm.reset(); cart = {}; calculateTotal(); renderProducts(searchInput.value);
+        orderForm.reset();
+        document.getElementById('pedido-fecha').value = new Date().toLocaleDateString('es-AR', { day:'2-digit', month:'2-digit', year:'numeric' });
+        cart = {}; calculateTotal(); renderProducts(searchInput.value);
     } catch(err) { console.error(err); showNotification(); }
     finally { btn.innerHTML = orig; btn.disabled = false; }
 });
