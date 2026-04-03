@@ -189,9 +189,8 @@ orderForm.addEventListener('submit', async (e) => {
     btn.disabled  = true;
 
     const payload = {
-        empresa: 'Saint Gottard', canal: CANAL, vendedor: 'SERVICOMERCIAL',
+        empresa: 'Saint Gottard', canal: CANAL, vendedor: document.getElementById('pedido-vendedor').value,
         fecha: document.getElementById('pedido-fecha').value,
-        vendedor_nombre: document.getElementById('pedido-vendedor').value,
         fecha_lista: fechaLista,
         fecha_pedido: new Date().toISOString(),
         cliente: {
