@@ -1,5 +1,5 @@
 // GENERADO AUTOMATICAMENTE DESDE GOOGLE SHEETS PARA GITHUB
-// Última actualización: 02/4/2026, 15:16:45
+// Última actualización: 07/4/2026, 11:26:54
 // Canal: DISTRIBUIDORES
 const MASTER_PRODUCTOS = [
     {
