@@ -1,5 +1,5 @@
 // GENERADO AUTOMATICAMENTE DESDE GOOGLE SHEETS PARA GITHUB
-// Última actualización: 02/4/2026, 15:16:49
+// Última actualización: 07/4/2026, 11:27:00
 // Canal: CANAL RETAIL (CR)
 const MASTER_PRODUCTOS = [
     {
