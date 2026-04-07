@@ -6,6 +6,7 @@ const CANAL = 'CR';
 let products = [];
 let fechaLista = '';
 let cart = {};
+let discounts = {}; // { [art]: { canal: number, adicional: number } }
 
 // ===== DOM =====
 const productsContainer = document.getElementById('products-container');
@@ -44,12 +45,10 @@ const categoryColors = {
 
 // ===== INIT =====
 document.addEventListener('DOMContentLoaded', () => {
-    // Auto-fill fecha
     const hoy = new Date();
     document.getElementById('pedido-fecha').value =
         hoy.toLocaleDateString('es-AR', { day:'2-digit', month:'2-digit', year:'numeric' });
 
-    // Carga dinámica del maestro
     const script = document.createElement('script');
     script.src = 'data.js?v=' + new Date().getTime();
     script.onload = () => {
@@ -98,6 +97,8 @@ function renderProducts(filterText = '') {
                 <div class="flex-1">Producto</div>
                 <div class="w-16 text-center">Est./Pack</div>
                 <div class="w-28 text-right">Precio Lista</div>
+                <div class="w-20 text-center ml-2">Desc. Canal</div>
+                <div class="w-20 text-center ml-1">Desc. Adic.</div>
                 <div class="w-28 text-center ml-3">Packs</div>
             </div>`;
 
@@ -108,6 +109,8 @@ function renderProducts(filterText = '') {
             const unid  = Number(p.UnidxBulto) || 1;
             const qty   = cart[art] ? cart[art].qty : 0;
             const img   = p.Imagen || '';
+            const descCanal = discounts[art]?.canal || 0;
+            const descAdic  = discounts[art]?.adicional || 0;
 
             rows += `
                 <div class="product-row border-b border-stone-50 last:border-0" data-art="${art}">
@@ -123,6 +126,18 @@ function renderProducts(filterText = '') {
                         <span class="text-[10px] font-bold text-brand-600 bg-brand-50 px-1.5 py-0.5 rounded">${unid} u.</span>
                     </div>
                     <div class="w-28 text-right font-bold text-sm text-gray-900 flex-shrink-0">$${precio.toLocaleString('es-AR',{minimumFractionDigits:2})}</div>
+                    <div class="w-20 ml-2 flex-shrink-0">
+                        <div class="relative">
+                            <input type="number" class="desc-canal-input w-full text-center border border-stone-200 rounded-lg px-1 py-1.5 text-xs focus:ring-2 focus:ring-brand-400 focus:border-brand-400 outline-none" value="${descCanal}" min="0" max="100" step="0.5" data-art="${art}" placeholder="0">
+                            <span class="absolute right-1.5 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 pointer-events-none">%</span>
+                        </div>
+                    </div>
+                    <div class="w-20 ml-1 flex-shrink-0">
+                        <div class="relative">
+                            <input type="number" class="desc-adicional-input w-full text-center border border-stone-200 rounded-lg px-1 py-1.5 text-xs focus:ring-2 focus:ring-brand-400 focus:border-brand-400 outline-none" value="${descAdic}" min="0" max="100" step="0.5" data-art="${art}" placeholder="0">
+                            <span class="absolute right-1.5 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 pointer-events-none">%</span>
+                        </div>
+                    </div>
                     <div class="w-28 ml-3 flex-shrink-0">
                         <div class="qty-group">
                             <button type="button" class="qty-btn btn-minus" data-art="${art}"><i class="fa-solid fa-minus"></i></button>
@@ -140,6 +155,16 @@ function renderProducts(filterText = '') {
     document.querySelectorAll('.btn-minus').forEach(b => b.addEventListener('click', () => updateCart(b.dataset.art, -1)));
     document.querySelectorAll('.btn-plus').forEach(b  => b.addEventListener('click', () => updateCart(b.dataset.art,  1)));
     document.querySelectorAll('.qty-input').forEach(i => i.addEventListener('change', () => setCart(i.dataset.art, parseInt(i.value)||0)));
+    document.querySelectorAll('.desc-canal-input').forEach(i => i.addEventListener('input', () => {
+        if (!discounts[i.dataset.art]) discounts[i.dataset.art] = { canal: 0, adicional: 0 };
+        discounts[i.dataset.art].canal = parseFloat(i.value) || 0;
+        calculateTotal();
+    }));
+    document.querySelectorAll('.desc-adicional-input').forEach(i => i.addEventListener('input', () => {
+        if (!discounts[i.dataset.art]) discounts[i.dataset.art] = { canal: 0, adicional: 0 };
+        discounts[i.dataset.art].adicional = parseFloat(i.value) || 0;
+        calculateTotal();
+    }));
 }
 
 // ===== CART =====
@@ -168,15 +193,26 @@ function setCartItem(art, q, price, p) {
     }
     calculateTotal();
 }
+
 function calculateTotal() {
     let total = 0, items = 0;
     for (const art in cart) {
         const u = Number(cart[art].item.UnidxBulto) || 1;
-        total += cart[art].qty * cart[art].price * u;
+        const descCanal = (discounts[art]?.canal || 0) / 100;
+        const descAdic  = (discounts[art]?.adicional || 0) / 100;
+        const precioEfectivo = cart[art].price * (1 - descCanal) * (1 - descAdic);
+        total += cart[art].qty * precioEfectivo * u;
         items += cart[art].qty;
     }
     totalAmountEl.innerText = '$ ' + total.toLocaleString('es-AR', {minimumFractionDigits:2});
     totalItemsEl.innerText  = items;
+}
+
+// ===== PLAZO =====
+function getPlazo(condicionPago) {
+    if (!condicionPago || condicionPago === 'Contado') return 0;
+    const match = String(condicionPago).match(/(\d+)/);
+    return match ? parseInt(match[1]) : 0;
 }
 
 // ===== SUBMIT =====
@@ -188,6 +224,8 @@ orderForm.addEventListener('submit', async (e) => {
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Enviando...';
     btn.disabled  = true;
 
+    const condicionPago = document.getElementById('cliente-condicion-pago').value;
+
     const payload = {
         empresa: 'Saint Gottard', canal: CANAL, vendedor: document.getElementById('pedido-vendedor').value,
         fecha: document.getElementById('pedido-fecha').value,
@@ -198,28 +236,39 @@ orderForm.addEventListener('submit', async (e) => {
             telefono:        document.getElementById('cliente-telefono').value,
             cuit:            document.getElementById('cliente-cuit').value,
             email:           document.getElementById('cliente-email').value,
-            condicion_pago:  document.getElementById('cliente-condicion-pago').value,
+            condicion_pago:  condicionPago,
+            plazo:           getPlazo(condicionPago),
             horario_entrega: document.getElementById('cliente-horario').value,
             direccion:       document.getElementById('cliente-direccion').value,
             facturacion:     document.getElementById('cliente-facturacion').value
         },
         transporte: {
-            nombre:            document.getElementById('transporte-nombre').value,
-            telefono:          document.getElementById('transporte-telefono').value,
+            nombre:               document.getElementById('transporte-nombre').value,
+            telefono:             document.getElementById('transporte-telefono').value,
             direccion_redespacho: document.getElementById('transporte-direccion').value
         },
         items: Object.values(cart).map(c => {
             const u = Number(c.item.UnidxBulto) || 1;
+            const descCanalPct = discounts[c.item.Art]?.canal || 0;
+            const descAdicPct  = discounts[c.item.Art]?.adicional || 0;
+            const precioEfectivo = c.price * (1 - descCanalPct/100) * (1 - descAdicPct/100);
             return {
                 cod: c.item.Art, ean13: c.item.EAN13,
                 producto: c.item.Producto, categoria: c.item.Categoria,
                 presentacion: c.item.Presentacion, est_x_pack: u,
                 packs: c.qty, precio_lista_unit: c.price,
-                subtotal: c.qty * c.price * u
+                desc_canal_pct: descCanalPct,
+                desc_adicional_pct: descAdicPct,
+                precio_efectivo_unit: precioEfectivo,
+                subtotal: c.qty * precioEfectivo * u
             };
         }),
-        total_estimado_sin_iva: Object.values(cart).reduce((s,c) => {
-            return s + c.qty * c.price * (Number(c.item.UnidxBulto)||1);
+        total_estimado_sin_iva: Object.values(cart).reduce((s, c) => {
+            const u = Number(c.item.UnidxBulto) || 1;
+            const descCanalPct = discounts[c.item.Art]?.canal || 0;
+            const descAdicPct  = discounts[c.item.Art]?.adicional || 0;
+            const precioEfectivo = c.price * (1 - descCanalPct/100) * (1 - descAdicPct/100);
+            return s + c.qty * precioEfectivo * u;
         }, 0)
     };
 
@@ -228,7 +277,7 @@ orderForm.addEventListener('submit', async (e) => {
         showNotification();
         orderForm.reset();
         document.getElementById('pedido-fecha').value = new Date().toLocaleDateString('es-AR', { day:'2-digit', month:'2-digit', year:'numeric' });
-        cart = {}; calculateTotal(); renderProducts(searchInput.value);
+        cart = {}; discounts = {}; calculateTotal(); renderProducts(searchInput.value);
     } catch(err) { console.error(err); showNotification(); }
     finally { btn.innerHTML = orig; btn.disabled = false; }
 });
